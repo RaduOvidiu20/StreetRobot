@@ -1,0 +1,15 @@
+# Ignoră toate fișierele și directoarele în mod implicit
+*
+
+# Exceptie pentru .gitignore pentru a fi inclus în git
+!.gitignore
+
+# Exceptie pentru directorul src (singurul pe care vrei să-l urci)
+!src/
+
+# Ignoră specific fișierele și directoarele generate
+build/
+install/
+log/
+*.gv
+*.pdf
