@@ -1,0 +1,17 @@
+Displays:
+  - Name: RobotModel
+    Type: robot_model/RVizPlugin
+    Robot Description: robot_description
+    Alpha: 1.0
+    Visible: true
+  - Name: PointCloud2
+    Type: rviz/PointCloud2
+    Topic: /lidar_pointcloud
+    Color Transformer: Intensity
+    Size (Pixels): 2
+    Style: Points
+    Alpha: 1.0
+    Position Transformer: XYZ
+    Autocompute Intensity Bounds: true
+Global Options:
+  Fixed Frame: base_link
