@@ -1,0 +1,6 @@
+use_sim_time: false
+odom_frame: odom
+map_frame: map
+base_frame: base_link
+scan_topic: /lidar_pointcloud
+mode: mapping

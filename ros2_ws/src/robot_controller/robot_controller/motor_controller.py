@@ -5,12 +5,23 @@ import serial
 import time
 import threading
 import math
+from geometry_msgs.msg import Twist
+
 
 class MotorControlNode(Node):
     def __init__(self):
-        super().__init__('motor_controller')
-        self.serial_port = serial.Serial('/dev/ttyUSB1', 115200)  # Adjust to the correct port for ESP32
-        time.sleep(2)  # Wait for 2 seconds to allow the serial connection to establish
+        super().__init__("motor_controller")
+        self.serial_port = serial.Serial("/dev/ttyUSB1", 115200)
+        self.subscription = self.create_subscription(
+            Twist, "/cmd_vel", self.handle_cmd_vel, 10
+        )
+
+    def handle_cmd_vel(self, msg):
+        linear_speed = int(msg.linear.x * 255)
+        angular_speed = int(msg.angular.z * 255)
+        command = f"{linear_speed},{angular_speed}\n"
+        self.serial_port.write(command.encode())
+        self.get_logger().info(f"Sent command: {command.strip()}")
 
         # Set up the UI
         self.window = tk.Tk()
@@ -19,7 +30,13 @@ class MotorControlNode(Node):
         # Motor 1 Speed Controls
         self.speed1_label = tk.Label(self.window, text="Speed Motor 1")
         self.speed1_label.pack()
-        self.speed1_scale = tk.Scale(self.window, from_=-255, to=255, orient=tk.HORIZONTAL, command=self.send_command)
+        self.speed1_scale = tk.Scale(
+            self.window,
+            from_=-255,
+            to=255,
+            orient=tk.HORIZONTAL,
+            command=self.send_command,
+        )
         self.speed1_scale.pack()
 
         self.speed1_entry = tk.Entry(self.window, width=5)
@@ -31,7 +48,13 @@ class MotorControlNode(Node):
         # Motor 2 Speed Controls
         self.speed2_label = tk.Label(self.window, text="Speed Motor 2")
         self.speed2_label.pack()
-        self.speed2_scale = tk.Scale(self.window, from_=-255, to=255, orient=tk.HORIZONTAL, command=self.send_command)
+        self.speed2_scale = tk.Scale(
+            self.window,
+            from_=-255,
+            to=255,
+            orient=tk.HORIZONTAL,
+            command=self.send_command,
+        )
         self.speed2_scale.pack()
 
         self.speed2_entry = tk.Entry(self.window, width=5)
@@ -46,11 +69,17 @@ class MotorControlNode(Node):
 
         # Fixed circles representing the wheels
         self.wheel1 = self.canvas.create_oval(50, 40, 70, 60, outline="green", width=2)
-        self.wheel2 = self.canvas.create_oval(130, 40, 150, 60, outline="green", width=2)
+        self.wheel2 = self.canvas.create_oval(
+            130, 40, 150, 60, outline="green", width=2
+        )
 
         # Markers that will "rotate" around the wheels based on encoder feedback
-        self.wheel1_marker = self.canvas.create_line(60, 50, 70, 50, fill="green", width=2)
-        self.wheel2_marker = self.canvas.create_line(140, 50, 150, 50, fill="green", width=2)
+        self.wheel1_marker = self.canvas.create_line(
+            60, 50, 70, 50, fill="green", width=2
+        )
+        self.wheel2_marker = self.canvas.create_line(
+            140, 50, 150, 50, fill="green", width=2
+        )
 
         # Labels to display encoder values below each wheel
         self.encoder1_label = tk.Label(self.window, text="Encoder 1: 0")
@@ -78,7 +107,7 @@ class MotorControlNode(Node):
         # Send command via serial in real-time
         if self.serial_port.is_open:
             self.serial_port.write(command.encode())
-            self.get_logger().info(f'Sent command: {command.strip()}')
+            self.get_logger().info(f"Sent command: {command.strip()}")
         else:
             self.get_logger().error("Serial port is not open")
 
@@ -100,11 +129,15 @@ class MotorControlNode(Node):
 
         # Update Motor 1 Display
         direction1 = "Forward" if speed1 > 0 else "Backward" if speed1 < 0 else "Stop"
-        self.speed1_display.config(text=f"Direction: {direction1} | Speed: {abs(speed1)}")
+        self.speed1_display.config(
+            text=f"Direction: {direction1} | Speed: {abs(speed1)}"
+        )
 
         # Update Motor 2 Display
         direction2 = "Forward" if speed2 > 0 else "Backward" if speed2 < 0 else "Stop"
-        self.speed2_display.config(text=f"Direction: {direction2} | Speed: {abs(speed2)}")
+        self.speed2_display.config(
+            text=f"Direction: {direction2} | Speed: {abs(speed2)}"
+        )
 
     def read_encoder_feedback(self):
         # This function reads encoder feedback from the ESP32 and updates the wheel movement
@@ -161,6 +194,7 @@ class MotorControlNode(Node):
         self.feedback_thread.join()
         self.window.destroy()
 
+
 def main(args=None):
     rclpy.init(args=args)
     motor_control_node = MotorControlNode()
@@ -168,5 +202,6 @@ def main(args=None):
     motor_control_node.destroy_node()
     rclpy.shutdown()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

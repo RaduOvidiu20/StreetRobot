@@ -25,6 +25,7 @@ setup(
             'motor_controller = robot_controller.motor_controller:main',
             'serial_reader = robot_controller.serial_reader:main',
             'static_transform_publisher = robot_controller.static_transform_publisher:main',
+            'pointcloud_to_laserscan = robot_controller.pointcloud_to_laserscan:main',
         ],
     },
 )
